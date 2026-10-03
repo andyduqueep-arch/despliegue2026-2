@@ -1,11 +1,13 @@
+
 import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib
 from io import BytesIO
 
+
 # ============================================================
-# CONFIGURACIÓN DE LA PÁGINA
+# CONFIGURACIÓN
 # ============================================================
 
 st.set_page_config(
@@ -15,191 +17,593 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+
 # ============================================================
-# ESTILOS CSS
+# ESTILOS
 # ============================================================
 
 st.markdown("""
 <style>
 
-    .stApp {
-        background: linear-gradient(
-            135deg,
-            #eef2ff 0%,
-            #f8fafc 50%,
-            #e0f2fe 100%
-        );
+.stApp {
+    background: linear-gradient(
+        135deg,
+        #eef2ff 0%,
+        #f8fafc 50%,
+        #e0f2fe 100%
+    );
+}
+
+.header-card {
+    background: linear-gradient(
+        135deg,
+        #4f46e5,
+        #2563eb
+    );
+
+    padding: 35px;
+    border-radius: 24px;
+    text-align: center;
+    color: white;
+    margin-bottom: 25px;
+
+    box-shadow:
+        0 12px 30px rgba(37, 99, 235, 0.25);
+}
+
+.header-card h1 {
+    font-size: 38px;
+    font-weight: 800;
+    margin: 5px 0 10px 0;
+}
+
+.header-card p {
+    font-size: 17px;
+    opacity: 0.92;
+    margin: 0;
+}
+
+.custom-card {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 28px;
+    border-radius: 20px;
+
+    box-shadow:
+        0 8px 25px rgba(15, 23, 42, 0.08);
+
+    border: 1px solid rgba(226, 232, 240, 0.8);
+
+    margin-bottom: 20px;
+}
+
+.section-title {
+    font-size: 23px;
+    font-weight: 750;
+    color: #1e293b;
+    margin-bottom: 5px;
+}
+
+.section-description {
+    color: #64748b;
+    font-size: 15px;
+    margin-bottom: 10px;
+}
+
+.info-box {
+    background: #eff6ff;
+    border-left: 5px solid #3b82f6;
+
+    padding: 15px 18px;
+
+    border-radius: 10px;
+
+    color: #1e40af;
+
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.result-card {
+    background: linear-gradient(
+        135deg,
+        #ecfdf5,
+        #d1fae5
+    );
+
+    border: 1px solid #86efac;
+
+    padding: 30px;
+
+    border-radius: 20px;
+
+    text-align: center;
+
+    margin-top: 25px;
+
+    box-shadow:
+        0 8px 25px rgba(16, 185, 129, 0.12);
+}
+
+.result-title {
+    color: #065f46;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.result-value {
+    color: #047857;
+    font-size: 48px;
+    font-weight: 850;
+    margin: 5px 0;
+}
+
+.result-subtitle {
+    color: #047857;
+    font-size: 14px;
+}
+
+.stButton > button {
+    width: 100%;
+    height: 55px;
+
+    border-radius: 14px;
+
+    border: none;
+
+    background: linear-gradient(
+        135deg,
+        #4f46e5,
+        #2563eb
+    );
+
+    color: white;
+
+    font-size: 17px;
+    font-weight: 700;
+
+    box-shadow:
+        0 8px 18px rgba(37, 99, 235, 0.25);
+
+    transition: all 0.2s ease;
+}
+
+.stButton > button:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 12px 25px rgba(37, 99, 235, 0.35);
+}
+
+div[data-baseweb="select"] > div {
+    border-radius: 12px;
+}
+
+div[data-baseweb="input"] > div {
+    border-radius: 12px;
+}
+
+.footer {
+    text-align: center;
+    color: #64748b;
+    font-size: 13px;
+    padding: 30px 0 10px 0;
+}
+
+#MainMenu {
+    visibility: hidden;
+}
+
+footer {
+    visibility: hidden;
+}
+
+@media (max-width: 768px) {
+
+    .header-card h1 {
+        font-size: 29px;
     }
 
     .header-card {
-        background: linear-gradient(
-            135deg,
-            #4f46e5,
-            #2563eb
-        );
-        padding: 35px;
-        border-radius: 24px;
-        text-align: center;
-        color: white;
-        margin-bottom: 25px;
-        box-shadow: 0 12px 30px rgba(37, 99, 235, 0.25);
-    }
-
-    .header-card h1 {
-        font-size: 38px;
-        font-weight: 800;
-        margin-bottom: 10px;
-    }
-
-    .header-card p {
-        font-size: 17px;
-        opacity: 0.92;
-        margin-bottom: 0;
+        padding: 25px 18px;
     }
 
     .custom-card {
-        background: rgba(255, 255, 255, 0.95);
-        padding: 28px;
-        border-radius: 20px;
-        box-shadow: 0 8px 25px rgba(15, 23, 42, 0.08);
-        border: 1px solid rgba(226, 232, 240, 0.8);
-        margin-bottom: 20px;
-    }
-
-    .section-title {
-        font-size: 23px;
-        font-weight: 750;
-        color: #1e293b;
-        margin-bottom: 5px;
-    }
-
-    .section-description {
-        color: #64748b;
-        font-size: 15px;
-        margin-bottom: 20px;
-    }
-
-    div[data-baseweb="select"] > div {
-        border-radius: 12px;
-        border: 1px solid #cbd5e1;
-    }
-
-    div[data-baseweb="input"] > div {
-        border-radius: 12px;
-        border: 1px solid #cbd5e1;
-    }
-
-    .stButton > button {
-        width: 100%;
-        height: 55px;
-        border-radius: 14px;
-        border: none;
-        background: linear-gradient(
-            135deg,
-            #4f46e5,
-            #2563eb
-        );
-        color: white;
-        font-size: 17px;
-        font-weight: 700;
-        box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
-        transition: all 0.2s ease;
-    }
-
-    .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 25px rgba(37, 99, 235, 0.35);
-    }
-
-    .result-card {
-        background: linear-gradient(
-            135deg,
-            #ecfdf5,
-            #d1fae5
-        );
-        border: 1px solid #86efac;
-        padding: 30px;
-        border-radius: 20px;
-        text-align: center;
-        margin-top: 25px;
-        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.12);
-    }
-
-    .result-title {
-        color: #065f46;
-        font-size: 18px;
-        font-weight: 600;
-        margin-bottom: 5px;
+        padding: 20px;
     }
 
     .result-value {
-        color: #047857;
-        font-size: 48px;
-        font-weight: 850;
-        margin: 5px 0;
+        font-size: 40px;
     }
 
-    .result-subtitle {
-        color: #047857;
-        font-size: 14px;
-    }
-
-    .info-box {
-        background: #eff6ff;
-        border-left: 5px solid #3b82f6;
-        padding: 15px 18px;
-        border-radius: 10px;
-        color: #1e40af;
-        margin-top: 15px;
-        margin-bottom: 15px;
-    }
-
-    .upload-box {
-        background: #f8fafc;
-        border: 2px dashed #94a3b8;
-        border-radius: 18px;
-        padding: 20px;
-        text-align: center;
-        margin-bottom: 20px;
-    }
-
-    .footer {
-        text-align: center;
-        color: #64748b;
-        font-size: 13px;
-        padding: 25px 0 10px 0;
-    }
-
-    #MainMenu {
-        visibility: hidden;
-    }
-
-    footer {
-        visibility: hidden;
-    }
-
-    @media (max-width: 768px) {
-
-        .header-card h1 {
-            font-size: 29px;
-        }
-
-        .header-card {
-            padding: 25px 18px;
-        }
-
-        .custom-card {
-            padding: 20px;
-        }
-
-        .result-value {
-            font-size: 40px;
-        }
-
-    }
+}
 
 </style>
 """, unsafe_allow_html=True)
+
+
+# ============================================================
+# OPCIONES FELDER
+# ============================================================
+
+OPCIONES_FELDER = [
+    "sensorial",
+    "activo",
+    "visual",
+    "equilibrio",
+    "secuencial",
+    "reflexivo",
+    "verbal",
+    "intuitivo"
+]
+
+
+# ============================================================
+# CARGAR MODELO
+# ============================================================
+
+@st.cache_resource
+def cargar_modelos():
+
+    try:
+
+        one_hot = joblib.load(
+            "one_hot_columns.joblib"
+        )
+
+        scaler = joblib.load(
+            "min_max_scaler.joblib"
+        )
+
+        model = joblib.load(
+            "bagging_optimizado.joblib"
+        )
+
+        return one_hot, scaler, model
+
+    except FileNotFoundError as e:
+
+        st.error(
+            "❌ No se encontró uno de los archivos del modelo."
+        )
+
+        st.info(
+            "Asegúrate de tener en la misma carpeta de app.py:"
+        )
+
+        st.code("""
+one_hot_columns.joblib
+min_max_scaler.joblib
+bagging_optimizado.joblib
+        """)
+
+        st.stop()
+
+
+# ============================================================
+# FUNCIÓN PARA PROCESAR DATOS
+# ============================================================
+
+def procesar_datos(df):
+
+    # --------------------------------------------------------
+    # Copia
+    # --------------------------------------------------------
+
+    df = df.copy()
+
+
+    # --------------------------------------------------------
+    # Limpiar nombres de columnas
+    # --------------------------------------------------------
+
+    df.columns = (
+        df.columns
+        .astype(str)
+        .str.strip()
+    )
+
+
+    # --------------------------------------------------------
+    # Aceptar ambas versiones de examen
+    # --------------------------------------------------------
+
+    if (
+        "Examen_admisión" not in df.columns
+        and
+        "Examen_admision" in df.columns
+    ):
+
+        df = df.rename(
+            columns={
+                "Examen_admision":
+                "Examen_admisión"
+            }
+        )
+
+
+    # --------------------------------------------------------
+    # Validar columnas
+    # --------------------------------------------------------
+
+    columnas_requeridas = [
+        "Felder",
+        "Examen_admisión"
+    ]
+
+    faltantes = [
+        columna
+        for columna in columnas_requeridas
+        if columna not in df.columns
+    ]
+
+    if faltantes:
+
+        raise ValueError(
+            "Faltan las columnas: "
+            + ", ".join(faltantes)
+        )
+
+
+    # --------------------------------------------------------
+    # Limpiar Felder
+    # --------------------------------------------------------
+
+    df["Felder"] = (
+        df["Felder"]
+        .astype(str)
+        .str.strip()
+        .str.lower()
+    )
+
+
+    # --------------------------------------------------------
+    # Validar Felder
+    # --------------------------------------------------------
+
+    invalidos = (
+        ~df["Felder"].isin(
+            OPCIONES_FELDER
+        )
+    )
+
+    if invalidos.any():
+
+        valores = (
+            df.loc[
+                invalidos,
+                "Felder"
+            ]
+            .unique()
+            .tolist()
+        )
+
+        raise ValueError(
+            "Valores de Felder no válidos: "
+            + ", ".join(
+                map(str, valores)
+            )
+        )
+
+
+    # --------------------------------------------------------
+    # Convertir examen a número
+    # --------------------------------------------------------
+
+    df["Examen_admisión"] = pd.to_numeric(
+        df["Examen_admisión"],
+        errors="coerce"
+    )
+
+
+    # --------------------------------------------------------
+    # Validar examen
+    # --------------------------------------------------------
+
+    if df["Examen_admisión"].isna().any():
+
+        raise ValueError(
+            "Hay valores vacíos o no numéricos "
+            "en Examen_admisión."
+        )
+
+
+    if (
+        (df["Examen_admisión"] < 0).any()
+        or
+        (df["Examen_admisión"] > 5).any()
+    ):
+
+        raise ValueError(
+            "Los valores de Examen_admisión "
+            "deben estar entre 0 y 5."
+        )
+
+
+    # --------------------------------------------------------
+    # Cargar componentes
+    # --------------------------------------------------------
+
+    one_hot, scaler, model = cargar_modelos()
+
+
+    # --------------------------------------------------------
+    # ONE-HOT
+    # --------------------------------------------------------
+
+    if isinstance(one_hot, list):
+
+        columnas_felder = [
+            columna
+            for columna in one_hot
+            if columna.startswith("Felder_")
+        ]
+
+        for columna in columnas_felder:
+
+            valor = columna.replace(
+                "Felder_",
+                ""
+            )
+
+            df[columna] = (
+                df["Felder"] == valor
+            ).astype(int)
+
+    else:
+
+        # Si se guardó un encoder de sklearn
+        try:
+
+            encoded = one_hot.transform(
+                df[["Felder"]]
+            )
+
+            if hasattr(
+                one_hot,
+                "get_feature_names_out"
+            ):
+
+                nombres = (
+                    one_hot
+                    .get_feature_names_out(
+                        ["Felder"]
+                    )
+                )
+
+                encoded_df = pd.DataFrame(
+                    encoded,
+                    columns=nombres,
+                    index=df.index
+                )
+
+            else:
+
+                encoded_df = pd.DataFrame(
+                    encoded,
+                    index=df.index
+                )
+
+            df = pd.concat(
+                [
+                    df,
+                    encoded_df
+                ],
+                axis=1
+            )
+
+            columnas_felder = [
+                columna
+                for columna in df.columns
+                if str(columna).startswith(
+                    "Felder_"
+                )
+            ]
+
+        except Exception:
+
+            encoded_df = pd.get_dummies(
+                df["Felder"],
+                prefix="Felder"
+            )
+
+            df = pd.concat(
+                [
+                    df,
+                    encoded_df
+                ],
+                axis=1
+            )
+
+            columnas_felder = [
+                columna
+                for columna in df.columns
+                if str(columna).startswith(
+                    "Felder_"
+                )
+            ]
+
+
+    # --------------------------------------------------------
+    # Asegurar columnas
+    # --------------------------------------------------------
+
+    if isinstance(one_hot, list):
+
+        for columna in columnas_felder:
+
+            if columna not in df.columns:
+
+                df[columna] = 0
+
+
+    # --------------------------------------------------------
+    # Eliminar Felder
+    # --------------------------------------------------------
+
+    df = df.drop(
+        columns=["Felder"],
+        errors="ignore"
+    )
+
+
+    # --------------------------------------------------------
+    # NORMALIZAR EXAMEN
+    # --------------------------------------------------------
+
+    examen_escalado = scaler.transform(
+        df[
+            ["Examen_admisión"]
+        ]
+    )
+
+
+    df["Examen_admision_scaled"] = (
+        np.asarray(
+            examen_escalado
+        ).reshape(-1)
+    )
+
+
+    # --------------------------------------------------------
+    # Eliminar examen original
+    # --------------------------------------------------------
+
+    df = df.drop(
+        columns=["Examen_admisión"],
+        errors="ignore"
+    )
+
+
+    # --------------------------------------------------------
+    # ORDEN DE COLUMNAS
+    # --------------------------------------------------------
+
+    columnas_modelo = (
+        columnas_felder
+        + [
+            "Examen_admision_scaled"
+        ]
+    )
+
+
+    df_modelo = df[
+        columnas_modelo
+    ].copy()
+
+
+    # --------------------------------------------------------
+    # PREDICCIÓN
+    # --------------------------------------------------------
+
+    predicciones = model.predict(
+        df_modelo
+    )
+
+
+    return (
+        df_modelo,
+        np.asarray(predicciones)
+    )
 
 
 # ============================================================
@@ -209,9 +613,13 @@ st.markdown("""
 st.markdown("""
 <div class="header-card">
 
-    <div style="font-size: 52px;">🎓</div>
+    <div style="font-size: 55px;">
+        🎓
+    </div>
 
-    <h1>Predicción de Aprobación</h1>
+    <h1>
+        Predicción de Aprobación
+    </h1>
 
     <p>
         Sistema inteligente para estimar la nota final
@@ -223,7 +631,7 @@ st.markdown("""
 
 
 # ============================================================
-# DESCRIPCIÓN
+# INFORMACIÓN
 # ============================================================
 
 st.markdown("""
@@ -234,9 +642,11 @@ st.markdown("""
     </div>
 
     <div class="section-description">
-        Puedes realizar una predicción individual o cargar
-        un archivo Excel para procesar varios estudiantes
-        automáticamente.
+
+        Selecciona una opción para realizar una predicción
+        individual o procesar múltiples estudiantes mediante
+        un archivo Excel.
+
     </div>
 
 </div>
@@ -247,192 +657,16 @@ st.markdown("""
 # PESTAÑAS
 # ============================================================
 
-tab1, tab2 = st.tabs([
-    "👤 Predicción individual",
-    "📂 Predicción con Excel"
-])
-
-
-# ============================================================
-# OPCIONES FELDER
-# ============================================================
-
-opciones_felder = [
-    'sensorial',
-    'activo',
-    'visual',
-    'equilibrio',
-    'secuencial',
-    'reflexivo',
-    'verbal',
-    'intuitivo'
-]
-
-
-# ============================================================
-# FUNCIONES DEL MODELO
-# ============================================================
-
-def cargar_componentes():
-
-    one_hot_transformer = joblib.load(
-        'one_hot_columns.joblib'
-    )
-
-    scaler = joblib.load(
-        'min_max_scaler.joblib'
-    )
-
-    model = joblib.load(
-        'bagging_optimizado.joblib'
-    )
-
-    return one_hot_transformer, scaler, model
-
-
-def procesar_datos(df_input):
-
-    one_hot_transformer, scaler, model = cargar_componentes()
-
-    df_procesado = df_input.copy()
-
-    # --------------------------------------------------------
-    # Validar columnas
-    # --------------------------------------------------------
-
-    columnas_necesarias = [
-        'Felder',
-        'Examen_admisión'
+tab1, tab2 = st.tabs(
+    [
+        "👤 Predicción individual",
+        "📂 Predicción con Excel"
     ]
-
-    for columna in columnas_necesarias:
-
-        if columna not in df_procesado.columns:
-
-            raise ValueError(
-                f"El archivo no contiene la columna "
-                f"'{columna}'."
-            )
-
-
-    # --------------------------------------------------------
-    # One-Hot Encoding
-    # --------------------------------------------------------
-
-    if isinstance(one_hot_transformer, list):
-
-        si_columnas_one_hot = [
-            col
-            for col in one_hot_transformer
-            if 'Felder_' in col
-        ]
-
-        for col_name in si_columnas_one_hot:
-
-            valor_esperado = col_name.replace(
-                'Felder_',
-                ''
-            )
-
-            df_procesado[col_name] = (
-                df_procesado['Felder'] == valor_esperado
-            ).astype(int)
-
-    else:
-
-        df_encoded = pd.get_dummies(
-            df_procesado[['Felder']]
-        )
-
-        df_procesado = pd.concat(
-            [
-                df_procesado,
-                df_encoded
-            ],
-            axis=1
-        )
-
-        si_columnas_one_hot = [
-            col
-            for col in df_procesado.columns
-            if 'Felder_' in col
-        ]
-
-
-    # --------------------------------------------------------
-    # Eliminar Felder
-    # --------------------------------------------------------
-
-    df_procesado = df_procesado.drop(
-        columns=['Felder'],
-        errors='ignore'
-    )
-
-
-    # --------------------------------------------------------
-    # Asegurar columnas
-    # --------------------------------------------------------
-
-    if isinstance(one_hot_transformer, list):
-
-        for col in si_columnas_one_hot:
-
-            if col not in df_procesado.columns:
-
-                df_procesado[col] = 0
-
-
-    # --------------------------------------------------------
-    # Normalizar examen
-    # --------------------------------------------------------
-
-    df_procesado['Examen_admision_scaled'] = (
-        scaler.transform(
-            df_procesado[['Examen_admisión']]
-        )
-    )
-
-
-    # --------------------------------------------------------
-    # Eliminar variable original
-    # --------------------------------------------------------
-
-    df_procesado = df_procesado.drop(
-        columns=['Examen_admisión'],
-        errors='ignore'
-    )
-
-
-    # --------------------------------------------------------
-    # Ordenar columnas
-    # --------------------------------------------------------
-
-    columnas_ordenadas = (
-        si_columnas_one_hot
-        + ['Examen_admision_scaled']
-    )
-
-    df_procesado = df_procesado[
-        columnas_ordenadas
-    ]
-
-
-    # --------------------------------------------------------
-    # Predicción
-    # --------------------------------------------------------
-
-    predicciones = model.predict(
-        df_procesado
-    )
-
-    return (
-        df_procesado,
-        predicciones
-    )
+)
 
 
 # ============================================================
-# TAB 1 - PREDICCIÓN INDIVIDUAL
+# TAB 1
 # ============================================================
 
 with tab1:
@@ -445,8 +679,7 @@ with tab1:
         </div>
 
         <div class="section-description">
-            Ingresa la información del estudiante para
-            obtener una predicción.
+            Introduce los datos para generar una predicción.
         </div>
 
     </div>
@@ -458,21 +691,25 @@ with tab1:
 
     with col1:
 
-        st.markdown("### 🧠 Estilo de aprendizaje")
+        st.markdown(
+            "### 🧠 Estilo de aprendizaje"
+        )
 
         felder_input = st.selectbox(
-            "Selecciona el estilo:",
-            opciones_felder,
+            "Estilo:",
+            OPCIONES_FELDER,
             label_visibility="collapsed"
         )
 
 
     with col2:
 
-        st.markdown("### 📝 Examen de admisión")
+        st.markdown(
+            "### 📝 Examen de admisión"
+        )
 
         examen_input = st.number_input(
-            "Puntuación:",
+            "Examen:",
             min_value=0.0,
             max_value=5.0,
             value=3.83,
@@ -482,18 +719,22 @@ with tab1:
         )
 
 
-    # Información de los datos
+    # --------------------------------------------------------
+    # Métricas
+    # --------------------------------------------------------
 
-    col_info1, col_info2 = st.columns(2)
+    col1, col2 = st.columns(2)
 
-    with col_info1:
+
+    with col1:
 
         st.metric(
             "🧠 Estilo seleccionado",
             felder_input.capitalize()
         )
 
-    with col_info2:
+
+    with col2:
 
         st.metric(
             "📝 Examen",
@@ -504,28 +745,48 @@ with tab1:
     st.markdown("<br>", unsafe_allow_html=True)
 
 
+    # --------------------------------------------------------
+    # Botón
+    # --------------------------------------------------------
+
     if st.button(
         "🚀 REALIZAR PREDICCIÓN",
-        key="prediccion_individual"
+        key="boton_individual"
     ):
 
         try:
 
-            df_input = pd.DataFrame({
-                'Felder': [felder_input],
-                'Examen_admisión': [examen_input]
-            })
-
-
-            df_procesado, predicciones = procesar_datos(
-                df_input
+            df_input = pd.DataFrame(
+                {
+                    "Felder": [
+                        felder_input
+                    ],
+                    "Examen_admisión": [
+                        examen_input
+                    ]
+                }
             )
+
+
+            with st.spinner(
+                "🤖 Ejecutando modelo..."
+            ):
+
+                df_modelo, predicciones = (
+                    procesar_datos(
+                        df_input
+                    )
+                )
 
 
             resultado = float(
                 predicciones[0]
             )
 
+
+            # ------------------------------------------------
+            # Datos procesados
+            # ------------------------------------------------
 
             st.markdown("""
             <div class="custom-card">
@@ -535,7 +796,7 @@ with tab1:
                 </div>
 
                 <div class="section-description">
-                    Variables utilizadas por el modelo.
+                    Variables enviadas al modelo.
                 </div>
 
             </div>
@@ -543,29 +804,37 @@ with tab1:
 
 
             st.dataframe(
-                df_procesado,
+                df_modelo,
                 use_container_width=True,
                 hide_index=True
             )
 
 
-            st.markdown(f"""
-            <div class="result-card">
+            # ------------------------------------------------
+            # Resultado
+            # ------------------------------------------------
 
-                <div class="result-title">
-                    🎯 Nota Final Estimada
+            st.markdown(
+                f"""
+                <div class="result-card">
+
+                    <div class="result-title">
+                        🎯 Nota Final Estimada
+                    </div>
+
+                    <div class="result-value">
+                        {resultado:.4f}
+                    </div>
+
+                    <div class="result-subtitle">
+                        Predicción generada por el modelo
+                        de Bagging
+                    </div>
+
                 </div>
-
-                <div class="result-value">
-                    {resultado:.4f}
-                </div>
-
-                <div class="result-subtitle">
-                    Predicción generada por el modelo de Bagging
-                </div>
-
-            </div>
-            """, unsafe_allow_html=True)
+                """,
+                unsafe_allow_html=True
+            )
 
 
         except Exception as e:
@@ -576,7 +845,7 @@ with tab1:
 
 
 # ============================================================
-# TAB 2 - PREDICCIÓN CON EXCEL
+# TAB 2 - EXCEL
 # ============================================================
 
 with tab2:
@@ -585,13 +854,15 @@ with tab2:
     <div class="custom-card">
 
         <div class="section-title">
-            📂 Predicción mediante archivo Excel
+            📂 Predicción mediante Excel
         </div>
 
         <div class="section-description">
-            Sube un archivo Excel con los estudiantes y
-            el sistema realizará las predicciones
+
+            Carga un archivo Excel para realizar
+            predicciones de múltiples estudiantes
             automáticamente.
+
         </div>
 
     </div>
@@ -599,46 +870,63 @@ with tab2:
 
 
     # --------------------------------------------------------
-    # Formato esperado
+    # Formato requerido
     # --------------------------------------------------------
 
     st.markdown("""
     <div class="info-box">
 
-        📌 <b>Formato requerido del Excel</b><br><br>
-
-        El archivo debe contener exactamente estas columnas:
+        📌 <b>Formato del archivo</b>
 
         <br><br>
 
-        <b>Felder</b> → estilo de aprendizaje
+        El Excel debe contener estas columnas:
+
+        <br><br>
+
+        <b>Felder</b>
 
         <br>
 
-        <b>Examen_admisión</b> → nota del examen de admisión
+        Estilo de aprendizaje.
 
         <br><br>
 
-        Ejemplo:
+        <b>Examen_admisión</b>
+
+        <br>
+
+        Nota del examen entre 0 y 5.
 
     </div>
     """, unsafe_allow_html=True)
 
 
-    ejemplo = pd.DataFrame({
-        'Felder': [
-            'sensorial',
-            'activo',
-            'visual',
-            'reflexivo'
-        ],
-        'Examen_admisión': [
-            3.83,
-            4.20,
-            3.50,
-            4.75
-        ]
-    })
+    # --------------------------------------------------------
+    # Ejemplo
+    # --------------------------------------------------------
+
+    st.markdown(
+        "### 📋 Ejemplo de Excel"
+    )
+
+
+    ejemplo = pd.DataFrame(
+        {
+            "Felder": [
+                "sensorial",
+                "activo",
+                "visual",
+                "reflexivo"
+            ],
+            "Examen_admisión": [
+                3.83,
+                4.20,
+                3.50,
+                4.75
+            ]
+        }
+    )
 
 
     st.dataframe(
@@ -652,51 +940,53 @@ with tab2:
     # Cargar archivo
     # --------------------------------------------------------
 
-    st.markdown("<br>", unsafe_allow_html=True)
-
-
-    archivo_excel = st.file_uploader(
-        "📁 Selecciona tu archivo Excel",
-        type=["xlsx", "xls"],
-        help="Sube un archivo Excel con las columnas Felder y Examen_admisión."
+    st.markdown(
+        "### 📁 Seleccionar archivo"
     )
 
 
-    if archivo_excel is not None:
+    archivo = st.file_uploader(
+        "Sube tu archivo Excel",
+        type=["xlsx", "xls"],
+        help=(
+            "El archivo debe contener Felder "
+            "y Examen_admisión."
+        )
+    )
+
+
+    if archivo is not None:
 
         try:
 
             # ------------------------------------------------
-            # Leer Excel
+            # Leer archivo
             # ------------------------------------------------
 
             df_excel = pd.read_excel(
-                archivo_excel
+                archivo
             )
 
+
+            # ------------------------------------------------
+            # Limpiar nombres
+            # ------------------------------------------------
+
+            df_excel.columns = (
+                df_excel.columns
+                .astype(str)
+                .str.strip()
+            )
+
+
+            # ------------------------------------------------
+            # Mostrar información
+            # ------------------------------------------------
 
             st.success(
-                f"✅ Archivo cargado correctamente: "
-                f"{len(df_excel)} estudiantes encontrados."
+                "✅ Archivo cargado correctamente."
             )
 
-
-            # ------------------------------------------------
-            # Mostrar datos originales
-            # ------------------------------------------------
-
-            st.markdown("### 👀 Datos cargados")
-
-            st.dataframe(
-                df_excel.head(10),
-                use_container_width=True,
-                hide_index=True
-            )
-
-
-            # ------------------------------------------------
-            # Información
-            # ------------------------------------------------
 
             col1, col2, col3 = st.columns(3)
 
@@ -719,154 +1009,60 @@ with tab2:
 
             with col3:
 
-                memoria = df_excel.memory_usage(
-                    deep=True
-                ).sum() / 1024
-
                 st.metric(
-                    "💾 Tamaño",
-                    f"{memoria:.1f} KB"
+                    "📊 Filas",
+                    df_excel.shape[0]
                 )
 
+
+            st.markdown(
+                "### 👀 Datos cargados"
+            )
+
+
+            st.dataframe(
+                df_excel,
+                use_container_width=True,
+                hide_index=True
+            )
+
+
+            # ------------------------------------------------
+            # Procesar
+            # ------------------------------------------------
 
             st.markdown("<br>", unsafe_allow_html=True)
 
 
-            # ------------------------------------------------
-            # Botón procesar
-            # ------------------------------------------------
-
             if st.button(
                 "🚀 PROCESAR ARCHIVO EXCEL",
-                key="procesar_excel"
+                key="boton_excel"
             ):
 
                 try:
-
-                    # ----------------------------------------
-                    # Validar columnas
-                    # ----------------------------------------
-
-                    columnas_requeridas = [
-                        'Felder',
-                        'Examen_admisión'
-                    ]
-
-
-                    columnas_faltantes = [
-                        col
-                        for col in columnas_requeridas
-                        if col not in df_excel.columns
-                    ]
-
-
-                    if columnas_faltantes:
-
-                        st.error(
-                            "❌ Faltan las siguientes columnas: "
-                            + ", ".join(
-                                columnas_faltantes
-                            )
-                        )
-
-                        st.stop()
-
-
-                    # ----------------------------------------
-                    # Validar Felder
-                    # ----------------------------------------
-
-                    valores_invalidos = (
-                        df_excel[
-                            ~df_excel['Felder'].isin(
-                                opciones_felder
-                            )
-                        ]['Felder']
-                        .dropna()
-                        .unique()
-                        .tolist()
-                    )
-
-
-                    if valores_invalidos:
-
-                        st.error(
-                            "❌ Se encontraron estilos "
-                            "de aprendizaje no válidos:"
-                        )
-
-                        st.write(
-                            valores_invalidos
-                        )
-
-                        st.info(
-                            "Los valores permitidos son: "
-                            + ", ".join(opciones_felder)
-                        )
-
-                        st.stop()
-
-
-                    # ----------------------------------------
-                    # Validar examen
-                    # ----------------------------------------
-
-                    if (
-                        df_excel['Examen_admisión']
-                        .isna()
-                        .any()
-                    ):
-
-                        st.error(
-                            "❌ Existen valores vacíos "
-                            "en Examen_admisión."
-                        )
-
-                        st.stop()
-
-
-                    if (
-                        (df_excel['Examen_admisión'] < 0)
-                        .any()
-                        or
-                        (df_excel['Examen_admisión'] > 5)
-                        .any()
-                    ):
-
-                        st.error(
-                            "❌ El Examen_admisión debe "
-                            "estar entre 0 y 5."
-                        )
-
-                        st.stop()
-
-
-                    # ----------------------------------------
-                    # Procesar modelo
-                    # ----------------------------------------
 
                     with st.spinner(
                         "🤖 Procesando estudiantes..."
                     ):
 
-                        df_procesado, predicciones = (
+                        df_modelo, predicciones = (
                             procesar_datos(
-                                df_excel[
-                                    columnas_requeridas
-                                ]
+                                df_excel
                             )
                         )
 
 
                     # ----------------------------------------
-                    # Agregar predicciones
+                    # Crear resultado
                     # ----------------------------------------
 
-                    df_resultado = df_excel.copy()
+                    df_resultado = (
+                        df_excel.copy()
+                    )
 
 
                     df_resultado[
-                        'Nota_Final_Estimada'
+                        "Nota_Final_Estimada"
                     ] = np.round(
                         predicciones,
                         4
@@ -874,15 +1070,17 @@ with tab2:
 
 
                     # ----------------------------------------
-                    # Mostrar resultados
+                    # Resultado
                     # ----------------------------------------
 
                     st.success(
-                        "🎉 ¡Predicción completada!"
+                        "🎉 ¡Predicciones generadas correctamente!"
                     )
 
 
-                    st.markdown("### 🎯 Resultados")
+                    st.markdown(
+                        "### 🎯 Resultados"
+                    )
 
 
                     st.dataframe(
@@ -896,10 +1094,14 @@ with tab2:
                     # Estadísticas
                     # ----------------------------------------
 
-                    st.markdown("### 📊 Resumen de predicciones")
+                    st.markdown(
+                        "### 📊 Resumen"
+                    )
 
 
-                    col1, col2, col3 = st.columns(3)
+                    col1, col2, col3, col4 = (
+                        st.columns(4)
+                    )
 
 
                     with col1:
@@ -914,32 +1116,46 @@ with tab2:
 
                         promedio = (
                             df_resultado[
-                                'Nota_Final_Estimada'
+                                "Nota_Final_Estimada"
                             ].mean()
                         )
 
                         st.metric(
-                            "📈 Promedio estimado",
+                            "📈 Promedio",
                             f"{promedio:.4f}"
                         )
 
 
                     with col3:
 
+                        minimo = (
+                            df_resultado[
+                                "Nota_Final_Estimada"
+                            ].min()
+                        )
+
+                        st.metric(
+                            "📉 Mínimo",
+                            f"{minimo:.4f}"
+                        )
+
+
+                    with col4:
+
                         maximo = (
                             df_resultado[
-                                'Nota_Final_Estimada'
+                                "Nota_Final_Estimada"
                             ].max()
                         )
 
                         st.metric(
-                            "🏆 Mayor predicción",
+                            "📈 Máximo",
                             f"{maximo:.4f}"
                         )
 
 
                     # ----------------------------------------
-                    # Crear Excel descargable
+                    # Crear Excel de salida
                     # ----------------------------------------
 
                     output = BytesIO()
@@ -947,13 +1163,13 @@ with tab2:
 
                     with pd.ExcelWriter(
                         output,
-                        engine='openpyxl'
+                        engine="openpyxl"
                     ) as writer:
 
                         df_resultado.to_excel(
                             writer,
                             index=False,
-                            sheet_name='Predicciones'
+                            sheet_name="Predicciones"
                         )
 
 
@@ -964,40 +1180,58 @@ with tab2:
                     # Descargar
                     # ----------------------------------------
 
-                    st.markdown("<br>", unsafe_allow_html=True)
+                    st.markdown(
+                        "### 📥 Descargar resultados"
+                    )
 
 
                     st.download_button(
-                        label="📥 DESCARGAR EXCEL CON PREDICCIONES",
-                        data=output,
-                        file_name="predicciones_estudiantes.xlsx",
+                        label=(
+                            "📥 DESCARGAR EXCEL "
+                            "CON PREDICCIONES"
+                        ),
+                        data=output.getvalue(),
+                        file_name=(
+                            "predicciones_estudiantes.xlsx"
+                        ),
                         mime=(
                             "application/vnd.openxmlformats-"
                             "officedocument.spreadsheetml.sheet"
                         ),
-                        key="descargar_excel"
+                        key="descargar_resultados"
                     )
 
 
                 except Exception as e:
 
                     st.error(
-                        "❌ Ocurrió un error al procesar "
-                        f"el archivo: {e}"
+                        "❌ No se pudo procesar el Excel."
                     )
+
+                    st.exception(e)
+
+
+        except Exception as e:
+
+            st.error(
+                "❌ No se pudo leer el archivo Excel."
+            )
+
+            st.exception(e)
 
 
 # ============================================================
-# FOOTER
+# PIE DE PÁGINA
 # ============================================================
 
 st.markdown("""
 <div class="footer">
 
     🎓 Sistema de Predicción Académica
+
     <br>
+
     Machine Learning + Streamlit
 
 </div>
 """, unsafe_allow_html=True)
-
